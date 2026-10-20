@@ -1,0 +1,9 @@
+{
+  "source": "https://download.geonames.org/export/dump/cities15000.zip",
+  "retrieved": "2026-09-16",
+  "license": "CC BY 4.0",
+  "attribution": "GeoNames (geonames.org)",
+  "zip_sha256": "4b958a19c7c73524f295247af201d5fe2f3e26f700ef81b04b95ffed5074ba08",
+  "records": 34144,
+  "transformation": "Selected columns; aliases limited to first 24; original coordinates retained."
+}

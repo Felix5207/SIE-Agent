@@ -1,0 +1,40 @@
+{
+  "name": "sie-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local evidence-first scientific information extraction powered by Pi",
+  "scripts": {
+    "dev": "node server/index.mjs",
+    "build": "vite build",
+    "start": "NODE_ENV=production node server/index.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check:publication": "python3 scripts/check-publication.py"
+  },
+  "dependencies": {
+    "@earendil-works/pi-coding-agent": "0.85.1",
+    "express": "5.1.0",
+    "katex": "^0.18.7",
+    "lucide-react": "0.468.0",
+    "multer": "2.0.2",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "react-markdown": "^10.1.0",
+    "rehype-katex": "^7.0.1",
+    "rehype-raw": "^7.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
+  },
+  "devDependencies": {
+    "vite": "6.4.1"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Felix5207/SIE-Agent.git"
+  }
+}

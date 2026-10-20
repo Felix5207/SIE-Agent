@@ -1,0 +1,1 @@
+软件验收的虚构示范原文，不是真实科研论文。Title: Teaching Study. DOI: 10.9999/teaching. 两个独立处理组：Control: mean concentration 8 mg/kg dry soil, standard deviation 2 mg/kg. Treated: mean concentration 16 mg/kg dry soil, standard deviation 3 mg/kg. These are arithmetic means and standard deviations, not standard errors. Each group is reported independently. No overall mean is reported.

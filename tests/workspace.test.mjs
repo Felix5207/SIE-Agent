@@ -1,0 +1,70 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import express from 'express';
+process.env.SIE_DATA_DIR=fs.mkdtempSync(path.join(os.tmpdir(),'sie-workspace-'));
+const {db,createProject,getProject,saveProject}=await import('../server/core.mjs');
+const {registerWorkspaceRoutes,createFolder,assignFolder,readSettings,writeSettings,makeShare,readShare,trashProject,restoreProject}=await import('../server/workspace.mjs');
+const {registerExtractionRoutes}=await import('../server/extraction.mjs');
+const app=express();app.use(express.json());
+const editable=id=>{const p=getProject(id);if(p.trashed_at||p.status==='extracting')throw Object.assign(new Error('not editable'),{status:409});return p;};
+registerWorkspaceRoutes(app,{editable});registerExtractionRoutes(app,{editable,enqueue:()=>{throw new Error('must not run');}});
+app.patch('/api/projects/:pid',(req,res)=>res.json({ok:true}));
+app.use((err,req,res,next)=>res.status(err.status||400).json({error:err.message}));
+const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));
+const base=`http://127.0.0.1:${server.address().port}`;
+const request=(url,body,method='POST')=>fetch(base+url,{method,headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});
+function fixture(){const p=createProject('研究任务');p.fields=[{name:'样本量'}];p.files=[{id:'f1',name:'study.pdf',role:'document',path:'/private/paper.pdf'}];p.blocks=[{id:'b1',file_id:'f1',page_idx:2,text:'12 participants'}];p.records=[{label:'Study',cells:{样本量:{value:12,status:'reported',evidence_ids:['b1'],review:'accepted'}}}];p.messages=[{text:'secret conversation'}];p.system_prompt='secret prompt';saveProject(p);return p;}
+test('settings persist only supported profile fields, and reject invalid sizes and empty names',()=>{writeSettings({name:'研究员',email:'reader@example.org',fontSize:18,system_prompt:'ignored'});assert.deepEqual(readSettings(),{name:'研究员',email:'reader@example.org',fontSize:18});assert.throws(()=>writeSettings({name:'  '}));assert.throws(()=>writeSettings({fontSize:100}));assert.throws(()=>writeSettings({email:'invalid'}));assert.equal(readSettings().fontSize,18);});
+test('folder membership persists without changing evidence, rejects nonexistent folder',()=>{const p=fixture(),f=createFolder('系统综述');assignFolder(p,f.id);assert.equal(getProject(p.id).folder_id,f.id);assert.equal(getProject(p.id).records[0].cells.样本量.value,12);assert.throws(()=>assignFolder(p,'unknown'));assignFolder(p,null);assert.equal(getProject(p.id).folder_id,null);});
+test('sharing uses immutable whitelisted snapshot and trash revokes it while preserving original records',()=>{const p=fixture(),s=makeShare(p),snapshot=readShare(s.token);assert.equal(snapshot.records[0].cells.样本量.quotes[0].page,3);assert.equal(snapshot.records[0].cells.样本量.quotes[0].text,'12 participants');assert.ok(!JSON.stringify(snapshot).includes('secret'));assert.ok(!JSON.stringify(snapshot).includes('/private'));p.records[0].cells.样本量.value=24;saveProject(p);assert.equal(readShare(s.token).records[0].cells.样本量.value,12);trashProject(p);assert.throws(()=>readShare(s.token));assert.equal(getProject(p.id).records[0].cells.样本量.value,24);restoreProject(getProject(p.id));assert.equal(getProject(p.id).trashed_at,undefined);assert.throws(()=>readShare(s.token));});
+test('task menu endpoints rename, move, trash and restore; running tasks cannot be removed',async()=>{const p=fixture();assert.equal((await request(`/api/projects/${p.id}/rename`,{name:'重命名任务'})).status,200);assert.equal(getProject(p.id).name,'重命名任务');assert.equal((await request(`/api/projects/${p.id}/rename`,{name:'  '})).status,400);p.status='extracting';saveProject(p);assert.equal((await request(`/api/projects/${p.id}/trash`,{})).status,409);p.status='draft';saveProject(p);assert.equal((await request(`/api/projects/${p.id}/trash`,{})).status,200);assert.equal((await request(`/api/projects/${p.id}`,{},'PATCH')).status,410);assert.equal((await request(`/api/extractions/${p.id}/run`,{})).status,410);assert.equal((await request(`/api/projects/${p.id}/restore`,{})).status,200);assert.equal(getProject(p.id).files.length,1);});
+test('revocation cannot delete another task’s link',async()=>{const a=fixture(),b=fixture(),s=makeShare(a);await request(`/api/projects/${b.id}/shares/${s.token}`,{},'DELETE');assert.equal(readShare(s.token).name,a.name);await request(`/api/projects/${a.id}/shares/${s.token}`,{},'DELETE');assert.equal((await request(`/api/shares/${s.token}`,undefined,'GET')).status,404);});
+test('guard does not intercept extraction creation, and library excludes trash',async()=>{const res=await request('/api/extractions',{name:'界面测试'});assert.equal(res.status,201);const p=fixture();trashProject(p);const lib=await(await request('/api/library',undefined,'GET')).json();assert.ok(!lib.some(f=>f.project_id===p.id));});
+test('folder-scoped extraction is persisted and invalid folders cannot create orphan tasks',async()=>{
+  const folder=createFolder('项目内提取');
+  const response=await request('/api/extractions',{name:'新提取',folder_id:folder.id});
+  assert.equal(response.status,201);
+  const task=await response.json();
+  assert.equal(task.folder_id,folder.id);
+  assert.equal(getProject(task.id).folder_id,folder.id);
+  const count=db.prepare('SELECT COUNT(*) AS count FROM projects').get().count;
+  assert.equal((await request('/api/extractions',{folder_id:'missing-folder'})).status,404);
+  assert.equal((await request('/api/extractions',{folder_id:{id:folder.id}})).status,400);
+  assert.equal(db.prepare('SELECT COUNT(*) AS count FROM projects').get().count,count);
+});
+test('folder rename and deletion preserve tasks, evidence, shares, and unrelated folders',async()=>{
+  const folder=createFolder('待删除项目'),other=createFolder('保留项目');
+  const task=fixture(),trashed=fixture(),unrelated=fixture();
+  assignFolder(task,folder.id);assignFolder(trashed,folder.id);assignFolder(unrelated,other.id);trashProject(trashed);
+  const snapshot=makeShare(task),before=getProject(task.id),beforeTrashed=getProject(trashed.id),beforeOther=getProject(unrelated.id);
+  const renamed=await request(`/api/workspace/folders/${folder.id}`,{name:'重命名项目'},'PATCH');
+  assert.equal(renamed.status,200);assert.equal((await renamed.json()).name,'重命名项目');
+  assert.equal((await request(`/api/workspace/folders/${folder.id}`,{name:'  '},'PATCH')).status,400);
+  assert.equal((await request(`/api/workspace/folders/${folder.id}`,undefined,'DELETE')).status,200);
+  assert.deepEqual(getProject(task.id),{...before,folder_id:null});
+  assert.deepEqual(getProject(trashed.id),{...beforeTrashed,folder_id:null});
+  assert.deepEqual(getProject(unrelated.id),beforeOther);
+  assert.equal(readShare(snapshot.token).records[0].cells.样本量.value,12);
+  const remaining=await(await request('/api/workspace/folders',undefined,'GET')).json();
+  assert.ok(!remaining.some(f=>f.id===folder.id));assert.ok(remaining.some(f=>f.id===other.id));
+  assert.equal((await request(`/api/workspace/folders/${folder.id}`,undefined,'DELETE')).status,404);
+  assert.equal((await request(`/api/workspace/folders/${folder.id}`,{name:'missing'},'PATCH')).status,404);
+});
+test('deleting a folder with active work fails atomically and succeeds after work stops',async()=>{
+  const folder=createFolder('运行中项目'),idle=fixture(),active=fixture();
+  assignFolder(idle,folder.id);assignFolder(active,folder.id);
+  for(const status of ['queued','parsing','extracting','correcting']){
+    active.status=status;saveProject(active);
+    assert.equal((await request(`/api/workspace/folders/${folder.id}`,undefined,'DELETE')).status,409);
+    assert.equal(getProject(idle.id).folder_id,folder.id);
+    assert.equal(getProject(active.id).folder_id,folder.id);
+    assert.ok(db.prepare('SELECT id FROM workspace_folders WHERE id=?').get(folder.id));
+  }
+  active.status='completed';saveProject(active);
+  assert.equal((await request(`/api/workspace/folders/${folder.id}`,undefined,'DELETE')).status,200);
+  assert.equal(getProject(idle.id).folder_id,null);assert.equal(getProject(active.id).folder_id,null);
+});
+test.after(async()=>{await new Promise(r=>server.close(r));db.close();fs.rmSync(process.env.SIE_DATA_DIR,{recursive:true,force:true});});

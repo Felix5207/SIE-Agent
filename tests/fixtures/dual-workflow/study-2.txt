@@ -1,0 +1,1 @@
+软件验收的虚构研究，不是真实科研资料。Study title: Test Study 2. DOI: 10.9999/test2. 本研究只有一个实验组，组名G2。结果表：Mean = 24; SD = 2; unit = mg/kg dry soil. 所有数据仅限本研究。
