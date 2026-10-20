@@ -1,18 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
   <title id="title">SIE-Agent</title>
-  <rect width="128" height="128" rx="26" fill="#173d41"/>
-  <g fill="none" stroke="#f2faf6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M59 27H32a9 9 0 0 0-9 9v56a9 9 0 0 0 9 9h34a9 9 0 0 0 9-9V43Z"/>
-    <path d="M59 27v12a4 4 0 0 0 4 4h12M35 52h21M35 63h11"/>
+  <rect x=".5" y=".5" width="127" height="127" rx="26" fill="#fff" stroke="#e5e5e5"/>
+  <g fill="none" stroke="#111" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M58 52V39L43 24H26a9 9 0 0 0-9 9v62a9 9 0 0 0 9 9h23a9 9 0 0 0 9-9V79"/>
+    <path d="M43 24v15h15M28 52h16M28 66h16"/>
   </g>
-  <g fill="none" stroke="#91e5cf" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M80 75h22M80 70h7a7 7 0 0 0 7-7v-2a5 5 0 0 1 5-5h3M80 80h7a7 7 0 0 1 7 7v2a5 5 0 0 0 5 5h3"/>
+  <path d="M53 61h13v-8l13 13-13 13v-8H53Z" fill="#ea3323"/>
+  <rect x="81" y="36" width="33" height="60" rx="5" fill="#ea3323"/>
+  <g fill="none" stroke="#fff" stroke-width="2.5">
+    <path d="M81 51h33M81 66h33M81 81h33M97.5 36v60"/>
   </g>
-  <g fill="#91e5cf">
-    <rect x="51" y="65" width="31" height="21" rx="6"/>
-    <rect x="100" y="51" width="11" height="11" rx="3"/>
-    <rect x="100" y="70" width="11" height="11" rx="3"/>
-    <rect x="100" y="89" width="11" height="11" rx="3"/>
-  </g>
-  <path d="M59 72h15M59 79h10" fill="none" stroke="#173d41" stroke-width="3.5" stroke-linecap="round"/>
 </svg>

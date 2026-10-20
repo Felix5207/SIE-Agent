@@ -1,12 +1,16 @@
-<p align="center">
-  <img src="public/sie-agent-icon.png" width="144" height="144" alt="SIE-Agent — a document connected to extracted data" />
-</p>
-
-# SIE-Agent
+<div align="center">
+  <img src="public/sie-agent-icon-v2.png" width="120" height="120" alt="SIE Agent — research paper to structured data" />
+  <h1>SIE-Agent</h1>
+  <p><strong>从论文中提取信息，回到原文核对证据。</strong></p>
+  <p>Scientific information extraction with traceable evidence.</p>
+  <p>
+    <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-111111?style=flat-square" /></a>
+    <img alt="Workspace: Local" src="https://img.shields.io/badge/Workspace-Local-EA3323?style=flat-square" />
+  </p>
+  <p><a href="#功能">功能</a> · <a href="#安装">安装</a> · <a href="#配置-api">API 配置</a> · <a href="#示例与测试">示例与测试</a></p>
+</div>
 
 本地运行的科研文献信息提取工作台。使用 Pi Agent SDK 调用用户配置的模型，通过 MinerU 或本地文档适配器处理资料，将提取结果、来源引用、人工复核和修订记录保存在本地。
-
-A local scientific information extraction workspace with configurable model APIs, document parsing, source-linked answers, and review history.
 
 ## 功能
 
