@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/sie-agent-icon.png" width="144" height="144" alt="SIE-Agent — a document connected to extracted data" />
+</p>
+
 # SIE-Agent
 
 本地运行的科研文献信息提取工作台。使用 Pi Agent SDK 调用用户配置的模型，通过 MinerU 或本地文档适配器处理资料，将提取结果、来源引用、人工复核和修订记录保存在本地。

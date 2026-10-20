@@ -1,1 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="10" fill="#173d41"/><path d="M12 15v-3h5m6 0h5v5m0 6v5h-5m-6 0h-5v-5M14 20h12" fill="none" stroke="#91e5cf" stroke-width="2.5" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">SIE-Agent</title>
+  <rect width="128" height="128" rx="26" fill="#173d41"/>
+  <g fill="none" stroke="#f2faf6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M59 27H32a9 9 0 0 0-9 9v56a9 9 0 0 0 9 9h34a9 9 0 0 0 9-9V43Z"/>
+    <path d="M59 27v12a4 4 0 0 0 4 4h12M35 52h21M35 63h11"/>
+  </g>
+  <g fill="none" stroke="#91e5cf" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M80 75h22M80 70h7a7 7 0 0 0 7-7v-2a5 5 0 0 1 5-5h3M80 80h7a7 7 0 0 1 7 7v2a5 5 0 0 0 5 5h3"/>
+  </g>
+  <g fill="#91e5cf">
+    <rect x="51" y="65" width="31" height="21" rx="6"/>
+    <rect x="100" y="51" width="11" height="11" rx="3"/>
+    <rect x="100" y="70" width="11" height="11" rx="3"/>
+    <rect x="100" y="89" width="11" height="11" rx="3"/>
+  </g>
+  <path d="M59 72h15M59 79h10" fill="none" stroke="#173d41" stroke-width="3.5" stroke-linecap="round"/>
+</svg>
